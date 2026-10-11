@@ -117,8 +117,8 @@ export const catalog: BeadColor[] = [...latestColorByCode.values()].filter(c=>(c
   const result = officialBagImages[c.colorCode] ? {...c,bagImage:officialBagImages[c.colorCode]} : c;
   if(['101','102','103','104','105','106','107','108','109','110','111','112','113','114','115','116','117','118','119','120','121','122'].includes(c.colorCode)) return {...result,verified:true,source:midiBags} ;
   if(knownMidiBags.has(c.colorCode)) return {...result,name:`Código ${c.colorCode} · nombre por verificar`,originalName:'Nombre pendiente de reconciliar con Hama',category:'pendiente' as Category,verified:false,source:midiBags} ;
-  if(retailerOnlyNames.has(c.colorCode)) return {...c,verified:false,source:retailerSource};
-  return c;
+  if(retailerOnlyNames.has(c.colorCode)) return {...result,verified:false,source:retailerSource};
+  return result;
 }).sort((a,b)=>Number(a.colorCode)-Number(b.colorCode));
 export const pendingMidiCodes = ['123','124','125'];
 export const pendingCount = catalog.filter(c=>!c.verified).length;

@@ -60,6 +60,25 @@ test('cada foto oficial se asigna solo al SKU idéntico y 42/57 conservan fallba
   assert.match(app, /width=1200/);
 });
 
+test('el catálogo activo exportado conserva bagImage en los 91 SKUs con foto', async () => {
+  // Importa el TypeScript con el runner nativo de Node, disponible en Node 22+.
+  const { catalog } = await import('../src/catalog.ts');
+  assert.equal(catalog.length, 93);
+  const withImage = catalog.filter(color => color.bagImage);
+  assert.equal(withImage.length, 91);
+  for (const code of ['01','02','03','05','18','95','98','101','108','125']) {
+    const color = catalog.find(item => item.colorCode === code);
+    assert.ok(color, `falta el código ${code}`);
+    assert.ok(color.bagImage, `el código ${code} perdió bagImage`);
+    assert.match(color.bagImage, new RegExp(`/207-${code}(?:_|\\.|-)`));
+  }
+  for (const code of ['42','57']) {
+    const color = catalog.find(item => item.colorCode === code);
+    assert.ok(color);
+    assert.equal(color.bagImage, undefined);
+  }
+});
+
 test('service worker cachea con límite las imágenes oficiales', () => {
   const config = fs.readFileSync(new URL('../vite.config.ts', import.meta.url), 'utf8');
   assert.match(config, /hama-product-images/);

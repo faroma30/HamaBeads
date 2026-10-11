@@ -45,6 +45,28 @@ test('123–125 siguen pendientes en nombre y tono', () => {
   assert.match(source, /verified:false,source:midiBags/);
 });
 
+test('cada foto oficial se asigna solo al SKU idéntico y 42/57 conservan fallback', () => {
+  const imageBlock = source.match(/const officialBagImages:Record<string,string>=\{([\s\S]*?)\n\};/)?.[1] ?? '';
+  const images = [...imageBlock.matchAll(/'([0-9]{2,3})':'(https:\/\/[^']+)'/g)];
+  assert.equal(images.length, 91);
+  assert.equal(new Set(images.map(([,code]) => code)).size, images.length);
+  for (const [,code,url] of images) assert.match(url, new RegExp(`/207-${code}(?:_|\\.|-)`), `la foto de ${code} debe corresponder al mismo SKU`);
+  assert.ok(!images.some(([,code]) => code === '42' || code === '57'));
+  assert.match(source, /officialBagImages\[c\.colorCode\]/);
+  const app = fs.readFileSync(new URL('../src/main.tsx', import.meta.url), 'utf8');
+  assert.match(app, /loading="lazy"/);
+  assert.match(app, /onError=\{\(\)=>setFailed\(true\)\}/);
+  assert.match(app, /Imagen pendiente/);
+  assert.match(app, /width=1200/);
+});
+
+test('service worker cachea con límite las imágenes oficiales', () => {
+  const config = fs.readFileSync(new URL('../vite.config.ts', import.meta.url), 'utf8');
+  assert.match(config, /hama-product-images/);
+  assert.match(config, /maxEntries: 100/);
+  assert.match(config, /30 \* 24 \* 60 \* 60/);
+});
+
 test('todos los registros tienen HEX legible e ID estable con ceros conservados', () => {
   for (const m of parsed) {
     assert.match(m[5], /^#[0-9A-Fa-f]{6}$/);

@@ -1,5 +1,5 @@
 export type Category = 'normal'|'translucido'|'neon'|'fluorescente'|'fosforescente'|'pastel'|'brillante'|'Bio'|'pendiente';
-export type BeadColor = { id:string; colorCode:string; name:string; originalName:string; category:Category; hex:string; verified:boolean; source:string; bagReference?:string };
+export type BeadColor = { id:string; colorCode:string; name:string; originalName:string; category:Category; hex:string; verified:boolean; source:string; bagReference?:string; bagImage?:string };
 const official = 'https://cdn.shopify.com/s/files/1/0726/3771/0492/files/Midi_-_Colour_palette.pdf';
 const midiBags = 'https://hama.dk/en/products/1000-midi-beads-in-bag';
 const chart2026 = 'https://cdn.shopify.com/s/files/1/0726/3771/0492/files/colour-chart-number.pdf?v=1777215620';
@@ -15,13 +15,108 @@ export const retailerSource = 'https://www.hamabeads.es/9-1000';
 const retailerOnlyNames = new Set(['101','102','103','104','105','106','107','123','124','125']);
 const catalogCodes2026 = new Set(['01','02','03','04','05','06','07','08','09','10','11','12','13','14','15','16','17','18','19','20','21','22','24','26','27','28','29','30','31','32','34','35','36','37','38','42','43','44','45','46','47','48','49','55','56','60','61','62','63','64','70','71','72','73','74','75','76','77','78','79','82','83','84','95','96','97','98','101','102','103','104','105','106','107','108','109','110','111','112','113','114','115','116','117','118','119','120','121','122']);
 const knownMidiBags = new Set(['123','124','125']);
+// URLs de imagen extraídas de la galería oficial Hama y asociadas por SKU.
+const officialBagImages:Record<string,string>={
+  '01':'https://hama.dk/cdn/shop/files/207-01_2.png?v=1773138841&width=640',
+  '02':'https://hama.dk/cdn/shop/files/207-02_2.png?v=1773138841&width=640',
+  '03':'https://hama.dk/cdn/shop/files/207-03_2.png?v=1773138841&width=640',
+  '04':'https://hama.dk/cdn/shop/files/207-04.png?v=1773138841&width=640',
+  '05':'https://hama.dk/cdn/shop/files/207-05.png?v=1773138841&width=640',
+  '06':'https://hama.dk/cdn/shop/files/207-06.png?v=1773138841&width=640',
+  '07':'https://hama.dk/cdn/shop/files/207-07.png?v=1773138841&width=640',
+  '08':'https://hama.dk/cdn/shop/files/207-08.png?v=1773138841&width=640',
+  '09':'https://hama.dk/cdn/shop/files/207-09.png?v=1773138841&width=640',
+  '10':'https://hama.dk/cdn/shop/files/207-10.png?v=1773138841&width=640',
+  '11':'https://hama.dk/cdn/shop/files/207-11.png?v=1773138841&width=640',
+  '12':'https://hama.dk/cdn/shop/files/207-12_2.png?v=1773138841&width=640',
+  '13':'https://hama.dk/cdn/shop/files/207-13_2.png?v=1773138841&width=640',
+  '14':'https://hama.dk/cdn/shop/files/207-14_2.png?v=1773138841&width=640',
+  '15':'https://hama.dk/cdn/shop/files/207-15_2.png?v=1773138841&width=640',
+  '16':'https://hama.dk/cdn/shop/files/207-16_2.png?v=1773138841&width=640',
+  '17':'https://hama.dk/cdn/shop/files/207-17_2.png?v=1773138841&width=640',
+  '18':'https://hama.dk/cdn/shop/files/207-18_2.png?v=1773138841&width=640',
+  '19':'https://hama.dk/cdn/shop/files/207-19_2.png?v=1773138841&width=640',
+  '20':'https://hama.dk/cdn/shop/files/207-20.png?v=1773138841&width=640',
+  '21':'https://hama.dk/cdn/shop/files/207-21_2.png?v=1773138841&width=640',
+  '22':'https://hama.dk/cdn/shop/files/207-22_2.png?v=1773138841&width=640',
+  '24':'https://hama.dk/cdn/shop/files/207-24.png?v=1773138841&width=640',
+  '26':'https://hama.dk/cdn/shop/files/207-26_2.png?v=1773138841&width=640',
+  '27':'https://hama.dk/cdn/shop/files/207-27_2.png?v=1773138841&width=640',
+  '28':'https://hama.dk/cdn/shop/files/207-28_2.png?v=1773138841&width=640',
+  '29':'https://hama.dk/cdn/shop/files/207-29_2.png?v=1773138841&width=640',
+  '30':'https://hama.dk/cdn/shop/files/207-30_2.png?v=1773138841&width=640',
+  '31':'https://hama.dk/cdn/shop/files/207-31_2.png?v=1773138841&width=640',
+  '32':'https://hama.dk/cdn/shop/files/207-32.png?v=1773138841&width=640',
+  '34':'https://hama.dk/cdn/shop/files/207-34_2.png?v=1773138841&width=640',
+  '35':'https://hama.dk/cdn/shop/files/207-35_2.png?v=1773138841&width=640',
+  '36':'https://hama.dk/cdn/shop/files/207-36_2.png?v=1773138841&width=640',
+  '37':'https://hama.dk/cdn/shop/files/207-37_2.png?v=1773138841&width=640',
+  '38':'https://hama.dk/cdn/shop/files/207-38_2.png?v=1773138841&width=640',
+  '43':'https://hama.dk/cdn/shop/files/207-43_2.png?v=1773138841&width=640',
+  '44':'https://hama.dk/cdn/shop/files/207-44_2.png?v=1773138841&width=640',
+  '45':'https://hama.dk/cdn/shop/files/207-45_2.png?v=1773138841&width=640',
+  '46':'https://hama.dk/cdn/shop/files/207-46_2.png?v=1773138841&width=640',
+  '47':'https://hama.dk/cdn/shop/files/207-47_2.png?v=1773138841&width=640',
+  '48':'https://hama.dk/cdn/shop/files/207-48_2.png?v=1773138841&width=640',
+  '49':'https://hama.dk/cdn/shop/files/207-49_2.png?v=1773138841&width=640',
+  '55':'https://hama.dk/cdn/shop/files/207-55.png?v=1773138841&width=640',
+  '56':'https://hama.dk/cdn/shop/files/207-56.png?v=1773138841&width=640',
+  '60':'https://hama.dk/cdn/shop/files/207-60_2.png?v=1773138841&width=640',
+  '61':'https://hama.dk/cdn/shop/files/207-61_2.png?v=1773138841&width=640',
+  '62':'https://hama.dk/cdn/shop/files/207-62_2.png?v=1773138841&width=640',
+  '63':'https://hama.dk/cdn/shop/files/207-63_2.png?v=1773138841&width=640',
+  '64':'https://hama.dk/cdn/shop/files/207-64_2.png?v=1773138841&width=640',
+  '70':'https://hama.dk/cdn/shop/files/207-70_2.png?v=1773138841&width=640',
+  '71':'https://hama.dk/cdn/shop/files/207-71_2.png?v=1773138841&width=640',
+  '72':'https://hama.dk/cdn/shop/files/207-72_2.png?v=1773138841&width=640',
+  '73':'https://hama.dk/cdn/shop/files/207-73_2.png?v=1773138841&width=640',
+  '74':'https://hama.dk/cdn/shop/files/207-74_2.png?v=1773138841&width=640',
+  '75':'https://hama.dk/cdn/shop/files/207-75_2.png?v=1773138841&width=640',
+  '76':'https://hama.dk/cdn/shop/files/207-76_2.png?v=1773138841&width=640',
+  '77':'https://hama.dk/cdn/shop/files/207-77_2.png?v=1773138841&width=640',
+  '78':'https://hama.dk/cdn/shop/files/207-78.png?v=1773138841&width=640',
+  '79':'https://hama.dk/cdn/shop/files/207-79_2.png?v=1773138841&width=640',
+  '82':'https://hama.dk/cdn/shop/files/207-82.png?v=1774950998&width=640',
+  '83':'https://hama.dk/cdn/shop/files/207-83_2.png?v=1773138841&width=640',
+  '84':'https://hama.dk/cdn/shop/files/207-84_2.png?v=1773138841&width=640',
+  '95':'https://hama.dk/cdn/shop/files/207-95_2.png?v=1773138841&width=640',
+  '96':'https://hama.dk/cdn/shop/files/207-96_2.png?v=1773138841&width=640',
+  '97':'https://hama.dk/cdn/shop/files/207-97_2.png?v=1773138841&width=640',
+  '98':'https://hama.dk/cdn/shop/files/207-98_2.png?v=1773138841&width=640',
+  '101':'https://hama.dk/cdn/shop/files/207-101_2.png?v=1773138841&width=640',
+  '102':'https://hama.dk/cdn/shop/files/207-102_2.png?v=1773138841&width=640',
+  '103':'https://hama.dk/cdn/shop/files/207-103.png?v=1773138841&width=640',
+  '104':'https://hama.dk/cdn/shop/files/207-104_2.png?v=1773138841&width=640',
+  '105':'https://hama.dk/cdn/shop/files/207-105.png?v=1773138841&width=640',
+  '106':'https://hama.dk/cdn/shop/files/207-106.png?v=1773138841&width=640',
+  '107':'https://hama.dk/cdn/shop/files/207-107.png?v=1773138841&width=640',
+  '108':'https://hama.dk/cdn/shop/files/207-108.png?v=1773138841&width=640',
+  '109':'https://hama.dk/cdn/shop/files/207-109.png?v=1773138841&width=640',
+  '110':'https://hama.dk/cdn/shop/files/207-110.png?v=1773138841&width=640',
+  '111':'https://hama.dk/cdn/shop/files/207-111_c0665f3e-4201-4f43-bdc0-51d217010eaa.png?v=1773138841&width=640',
+  '112':'https://hama.dk/cdn/shop/files/207-112.jpg?v=1773138841&width=640',
+  '113':'https://hama.dk/cdn/shop/files/207-113.jpg?v=1773138841&width=640',
+  '114':'https://hama.dk/cdn/shop/files/207-114.jpg?v=1773138841&width=640',
+  '115':'https://hama.dk/cdn/shop/files/207-115.jpg?v=1773138841&width=640',
+  '116':'https://hama.dk/cdn/shop/files/207-116.jpg?v=1773138841&width=640',
+  '117':'https://hama.dk/cdn/shop/files/207-117.png?v=1773138841&width=640',
+  '118':'https://hama.dk/cdn/shop/files/207-118_3399b885-3e68-401c-a283-4cc13a9e07c2.png?v=1773138841&width=640',
+  '119':'https://hama.dk/cdn/shop/files/207-119.png?v=1773138841&width=640',
+  '120':'https://hama.dk/cdn/shop/files/207-120.png?v=1776248103&width=640',
+  '121':'https://hama.dk/cdn/shop/files/207-121.png?v=1776248101&width=640',
+  '122':'https://hama.dk/cdn/shop/files/207-122_c06f16c5-c5d6-49ca-9ba8-8132f9e2b114.png?v=1776248136&width=640',
+  '123':'https://hama.dk/cdn/shop/files/207-123.jpg?v=1787057139&width=640',
+  '124':'https://hama.dk/cdn/shop/files/207-124.jpg?v=1787058037&width=640',
+  '125':'https://hama.dk/cdn/shop/files/207-125.jpg?v=1787058037&width=640',
+};
 // Las filas históricas contienen más de una revisión para algunos códigos.
 // Una tarjeta por código evita duplicados sin tocar los stocks guardados por ID.
 const latestColorByCode = new Map<string, BeadColor>();
 for (const color of verifiedColors) latestColorByCode.set(color.colorCode, color);
 export const catalog: BeadColor[] = [...latestColorByCode.values()].filter(c=>(c.colorCode==='57'||catalogCodes2026.has(c.colorCode)||knownMidiBags.has(c.colorCode))).map(c=>{
-  if(['101','102','103','104','105','106','107','108','109','110','111','112','113','114','115','116','117','118','119','120','121','122'].includes(c.colorCode)) return {...c,verified:true,source:midiBags};
-  if(knownMidiBags.has(c.colorCode)) return {...c,name:`Código ${c.colorCode} · nombre por verificar`,originalName:'Nombre pendiente de reconciliar con Hama',category:'pendiente' as Category,verified:false,source:midiBags};
+  const result = officialBagImages[c.colorCode] ? {...c,bagImage:officialBagImages[c.colorCode]} : c;
+  if(['101','102','103','104','105','106','107','108','109','110','111','112','113','114','115','116','117','118','119','120','121','122'].includes(c.colorCode)) return {...result,verified:true,source:midiBags} ;
+  if(knownMidiBags.has(c.colorCode)) return {...result,name:`Código ${c.colorCode} · nombre por verificar`,originalName:'Nombre pendiente de reconciliar con Hama',category:'pendiente' as Category,verified:false,source:midiBags} ;
   if(retailerOnlyNames.has(c.colorCode)) return {...c,verified:false,source:retailerSource};
   return c;
 }).sort((a,b)=>Number(a.colorCode)-Number(b.colorCode));
